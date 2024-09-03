@@ -1,10 +1,78 @@
 pipeline {
     agent any
-   
+    environment {
+        GITNAME = 'shlim0118'
+        GITMAIL = 'tim02366@naver.com'
+        GITWEBADD = 'https://github.com/shlim0118/hama-lobby.git'
+        GITSSHADD = 'git@github.com:shlim0118/hama-lobby.git'
+        GITCREDENTIAL = 'git_cre'
+        ECR = '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby'
+        AWSCREDENTIAL = 'aws_cre'
+    }
     stages {
-        stage('start') {
+        stage('Checkout Github') {
             steps {
-                sh "echo hello jenkins!!!"
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [],
+                userRemoteConfigs: [[credentialsId: GITCREDENTIAL, url: GITWEBADD]]])
+            }
+            post {
+                failure {
+                    sh "echo clone failed"
+                }
+                success {
+                    sh "echo clone success"
+                }
+            }
+        }
+        stage('Docker 이미지 빌드') {
+            steps {
+                sh "docker build -t ${ECR}:${currentBuild.number} ."   // 현재 빌드 번호를 도커 이미지 태그로 사용
+                sh "docker build -t ${ECR}:latest ."                   // 최신 태그로 이미지 빌드
+            }
+            post {
+                failure {
+                    sh "echo image build failed"
+                }
+                success {
+                    sh "echo image build success"
+                }
+            }
+        }
+        stage('Docker 이미지 푸시') {
+            steps {
+                withDockerRegistry(credentialsId: AWSCREDENTIAL, url: '') {
+                    sh "docker push ${ECR}:${currentBuild.number}"
+                    sh "docker push ${ECR}:latest"
+                }
+            }
+            post {
+                failure {
+                    sh "docker image rm -f  ${ECR}:${currentBuild.number}"
+                    sh "docker image rm -f  ${ECR}:latest"
+                    sh "echo push failed"
+                }
+                success {
+                    sh "docker image rm -f  ${ECR}:${currentBuild.number}"
+                    sh "docker image rm -f  ${ECR}:latest"
+                    sh "echo push success"
+                }
+            }
+        }
+        stage('EKS 매니페스트 파일 업데이트') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWSCREDENTIAL]]) {
+                    git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
+                    sh "git config --global user.email ${GITMAIL}"
+                    sh "git config --global user.name ${GITNAME}"
+                    sh "sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' fast.yml"
+
+                    sh "git add ."
+                    sh "git branch -M main"
+                    sh "git commit -m 'fixed tag ${currentBuild.number}'"
+                    sh "git remote remove origin"
+                    sh "git remote add origin ${GITSSHADD}"
+                    sh "git push origin main"
+                }
             }
             post {
                 failure {
