@@ -76,7 +76,7 @@ pipeline {
             }
             post {
                 failure {
-                    sh "echo failed"
+                    sh "echo failedzz"
                 }
                 success {
                     sh "echo success"
