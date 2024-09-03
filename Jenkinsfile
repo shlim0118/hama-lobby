@@ -40,7 +40,7 @@ pipeline {
         }
         stage('Docker 이미지 푸시') {
             steps {
-                withDockerRegistry(credentialsId: AWSCREDENTIAL, url: '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby') {
+                withDockerRegistry(credentialsId: ecr:ap-northeast-2:aws_cre, url: 'https://756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby') {
                     sh "docker push ${ECR}:${currentBuild.number}"
                     sh "docker push ${ECR}:latest"
                 }
@@ -60,7 +60,7 @@ pipeline {
         }
         stage('EKS 매니페스트 파일 업데이트') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWSCREDENTIAL]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: ecr:ap-northeast-2:aws_cre]]) {
                     git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
                     sh "git config --global user.email ${GITMAIL}"
                     sh "git config --global user.name ${GITNAME}"
