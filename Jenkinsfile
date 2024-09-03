@@ -60,7 +60,7 @@ pipeline {
         }
         stage('EKS 매니페스트 파일 업데이트') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: ecr:ap-northeast-2:aws_cre]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'ecr:ap-northeast-2:aws_cre']]) {
                     git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
                     sh "git config --global user.email ${GITMAIL}"
                     sh "git config --global user.name ${GITNAME}"
