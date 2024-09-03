@@ -40,7 +40,7 @@ pipeline {
         }
         stage('Docker 이미지 푸시') {
             steps {
-                withDockerRegistry(credentialsId: AWSCREDENTIAL, url: '') {
+                withDockerRegistry(credentialsId: AWSCREDENTIAL, url: '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby') {
                     sh "docker push ${ECR}:${currentBuild.number}"
                     sh "docker push ${ECR}:latest"
                 }
