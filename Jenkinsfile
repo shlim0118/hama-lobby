@@ -17,10 +17,10 @@ pipeline {
             }
             post {
                 failure {
-                    sh "echo clone failed"
+                    sh 'echo clone failed'
                 }
                 success {
-                    sh "echo clone success"
+                    sh 'echo clone success'
                 }
             }
         }
@@ -31,10 +31,10 @@ pipeline {
             }
             post {
                 failure {
-                    sh "echo image build failed"
+                    sh 'echo image build failed'
                 }
                 success {
-                    sh "echo image build success"
+                    sh 'echo image build success'
                 }
             }
         }
@@ -49,37 +49,35 @@ pipeline {
                 failure {
                     sh "docker image rm -f  ${ECR}:${currentBuild.number}"
                     sh "docker image rm -f  ${ECR}:latest"
-                    sh "echo push failed"
+                    sh 'echo push failed'
                 }
                 success {
                     sh "docker image rm -f  ${ECR}:${currentBuild.number}"
                     sh "docker image rm -f  ${ECR}:latest"
-                    sh "echo push success"
+                    sh 'echo push success'
                 }
             }
         }
         stage('send to CD') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'ecr:ap-northeast-2:aws_cre']]) {
                     git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
                     sh "git config --global user.email ${GITMAIL}"
                     sh "git config --global user.name ${GITNAME}"
                     sh "sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' lobby-sub.yaml"
 
-                    sh "git add ."
-                    sh "git branch -M main"
+                    sh 'git add .'
+                    sh 'git branch -M main'
                     sh "git commit -m 'fixed tag ${currentBuild.number}'"
-                    sh "git remote remove origin"
+                    sh 'git remote remove origin'
                     sh "git remote add origin ${GITSSHADD}"
-                    sh "git push origin main"
-                }
+                    sh 'git push origin main'
             }
             post {
                 failure {
-                    sh "echo failedzz"
+                    sh 'echo failedzz'
                 }
                 success {
-                    sh "echo success"
+                    sh 'echo success'
                 }
             }
         }
