@@ -8,6 +8,8 @@ pipeline {
         GITCREDENTIAL = 'git_cre'
         ECR = '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby'
         AWSCREDENTIAL = 'aws_cre'
+        LOBBY_BOT_TOKEN = credentials('LOBBY_BOT_TOKEN')
+
     }
     stages {
         stage('Checkout Github') {
@@ -24,6 +26,20 @@ pipeline {
                 }
             }
         }
+        stage('Update config.yml with LOBBY_BOT_TOKEN') {
+            steps {
+                // 정확한 경로로 config.yml 수정
+                sh "sed -i 's@\\\${LOBBY_BOT_TOKEN}@${LOBBY_BOT_TOKEN}@g' plugins/DiscordSRV/config.yml"
+            }
+            post {
+                failure {
+                    sh 'echo config update failed'
+                }
+                success {
+                    sh 'echo config update success'
+                }
+            }
+        }        
         stage('Docker 이미지 빌드') {
             steps {
                 sh "docker build -t ${ECR}:${currentBuild.number} ."   // 현재 빌드 번호를 도커 이미지 태그로 사용
