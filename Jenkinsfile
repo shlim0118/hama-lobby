@@ -3,10 +3,10 @@ pipeline {
     environment {
         GITNAME = 'shlim0118'
         GITMAIL = 'tim02366@naver.com'
-        GITWEBADD = 'https://github.com/shlim0118/hama-fish.git'
-        GITSSHADD = 'git@github.com:shlim0118/fish-deployment.git'
+        GITWEBADD = 'https://github.com/shlim0118/hama-lobby.git'
+        GITSSHADD = 'git@github.com:shlim0118/lobby-deploy.git'
         GITCREDENTIAL = 'git_cre'
-        ECR = '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/fish'
+        ECR = '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby'
         AWSCREDENTIAL = 'aws_cre'
     }
     stages {
@@ -40,7 +40,7 @@ pipeline {
         }
         stage('ECR 에 이미지 푸시') {
             steps {
-                withDockerRegistry(credentialsId: 'ecr:ap-northeast-2:aws_cre', url: 'https://756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/fish') {
+                withDockerRegistry(credentialsId: 'ecr:ap-northeast-2:aws_cre', url: 'https://756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby') {
                     sh "docker push ${ECR}:${currentBuild.number}"
                     sh "docker push ${ECR}:latest"
                 }
@@ -63,7 +63,7 @@ pipeline {
                     git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
                     sh "git config --global user.email ${GITMAIL}"
                     sh "git config --global user.name ${GITNAME}"
-                    sh "sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' fish.yml"
+                    sh "sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' lobby-sub.yaml"
 
                     sh 'git add .'
                     sh 'git branch -M main'
