@@ -119,7 +119,7 @@ Database:
   Port: 3306
   Username: admin
   Password: test1234
-  Database: lobby_cloud
+  Database: lobby_cloudlog
   Data-Deletion: 1
 SQLite:
   Enable: false
