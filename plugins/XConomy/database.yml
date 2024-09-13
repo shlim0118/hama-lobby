@@ -20,7 +20,7 @@ MySQL:
   port: 3306
   user: admin
   pass: test1234
-  database: lobby_cloud
+  database: lobby_xconomy
   #auto add "_", can use %sign% to indicate Server ID (BungeeCord settings)
   table-suffix: ''
   property:
