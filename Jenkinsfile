@@ -4,7 +4,7 @@ pipeline {
         GITNAME = 'shlim0118'
         GITMAIL = 'tim02366@naver.com'
         GITWEBADD = 'https://github.com/shlim0118/hama-lobby.git'
-        GITSSHADD = 'git@github.com:shlim0118/lobby-deploy.git'
+        GITSSHADD = 'git@github.com:shlim0118/hama-deployment.git'
         GITCREDENTIAL = 'git_cre'
         ECR = '756266714368.dkr.ecr.ap-northeast-2.amazonaws.com/lobby'
         AWSCREDENTIAL = 'aws_cre'
@@ -29,7 +29,10 @@ pipeline {
         stage('Update config.yml with LOBBY_BOT_TOKEN') {
             steps {
                 // 정확한 경로로 config.yml 수정
-                sh "sed -i 's@\\\${LOBBY_BOT_TOKEN}@${LOBBY_BOT_TOKEN}@g' plugins/DiscordSRV/config.yml"
+                sh """
+                    cd lobby
+                    sed -i 's@\\\${LOBBY_BOT_TOKEN}@${LOBBY_BOT_TOKEN}@g' plugins/DiscordSRV/config.yml
+                """
             }
             post {
                 failure {
@@ -79,8 +82,10 @@ pipeline {
                     git credentialsId: GITCREDENTIAL, url: GITSSHADD, branch: 'main'
                     sh "git config --global user.email ${GITMAIL}"
                     sh "git config --global user.name ${GITNAME}"
-                    sh "sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' lobby-sub.yaml"
-
+                    sh """
+                        cd lobby
+                        sed -i 's@${ECR}:.*@${ECR}:${currentBuild.number}@g' lobby.yaml
+                    """
                     sh 'git add .'
                     sh 'git branch -M main'
                     sh "git commit -m 'fixed tag ${currentBuild.number}'"
