@@ -29,10 +29,7 @@ pipeline {
         stage('Update config.yml with LOBBY_BOT_TOKEN') {
             steps {
                 // 정확한 경로로 config.yml 수정
-                sh """
-                    cd lobby
-                    sed -i 's@\\\${LOBBY_BOT_TOKEN}@${LOBBY_BOT_TOKEN}@g' plugins/DiscordSRV/config.yml
-                """
+                sh "sed -i 's@\\\${LOBBY_BOT_TOKEN}@${LOBBY_BOT_TOKEN}@g' plugins/DiscordSRV/config.yml"
             }
             post {
                 failure {
